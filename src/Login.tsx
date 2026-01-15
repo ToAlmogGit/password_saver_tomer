@@ -1,7 +1,26 @@
-
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebase';
 
 export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate('/'); // Redirect to home/dashboard after login
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#F7FAFC]">
             <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
@@ -20,10 +39,17 @@ export default function Login() {
                                             <p className="text-[#b89d9d] text-base font-normal leading-normal">Log in to your account</p>
                                         </div>
                                     </div>
+                                    {error && <p className="text-red-500 text-center px-4">{error}</p>}
                                     <div className="w-full px-4 py-3">
                                         <label className="flex flex-col min-w-40 flex-1">
                                             <p className="text-white text-base font-medium leading-normal pb-2">Email</p>
-                                            <input className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#382929] focus:border-none h-14 placeholder:text-[#b89d9d] p-4 text-base font-normal leading-normal" placeholder="Enter your email" defaultValue="" />
+                                            <input
+                                                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#382929] focus:border-none h-14 placeholder:text-[#b89d9d] p-4 text-base font-normal leading-normal"
+                                                placeholder=""
+                                                autoComplete="off"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            />
                                         </label>
                                     </div>
                                     <div className="w-full px-4 py-3">
@@ -32,7 +58,14 @@ export default function Login() {
                                                 <p className="text-white text-base font-medium leading-normal">Password</p>
                                             </div>
                                             <div className="flex w-full flex-1 items-stretch rounded-lg">
-                                                <input className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#382929] focus:border-none h-14 placeholder:text-[#b89d9d] p-4 rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal" placeholder="Enter your password" type="password" defaultValue="" />
+                                                <input
+                                                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#382929] focus:border-none h-14 placeholder:text-[#b89d9d] p-4 rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal"
+                                                    placeholder=""
+                                                    type="password"
+                                                    autoComplete="off"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                />
                                                 <button aria-label="Toggle password visibility" className="text-[#b89d9d] flex border-none bg-[#382929] items-center justify-center pr-4 rounded-r-lg border-l-0">
                                                     <span className="material-symbols-outlined">visibility</span>
                                                 </button>
@@ -40,7 +73,10 @@ export default function Login() {
                                         </label>
                                     </div>
                                     <div className="w-full px-4 pt-3 mt-4">
-                                        <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 flex-1 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                                        <button
+                                            className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 flex-1 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+                                            onClick={handleLogin}
+                                        >
                                             <span className="truncate">Login</span>
                                         </button>
                                     </div>

@@ -1,6 +1,40 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
 
 export default function Register() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                createdAt: new Date().toISOString()
+            });
+
+            navigate('/login');
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#F7FAFC]">
             <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
@@ -31,15 +65,36 @@ export default function Register() {
                                         <p className="text-white text-4xl font-black leading-tight tracking-[-0.033em]">Create Your Secure Account</p>
                                         <p className="text-[#b89d9d] text-base font-normal leading-normal mt-3">Secure your digital life with a single master password.</p>
                                     </div>
-                                    <form className="space-y-6">
+                                    <form className="space-y-6" onSubmit={handleRegister}>
+                                        {error && <p className="text-red-500 text-center">{error}</p>}
                                         <div className="flex flex-col">
                                             <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="email">Email Address</label>
-                                            <input autoComplete="email" className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] text-base font-normal leading-normal" id="email" name="email" placeholder="you@example.com" required type="email" />
+                                            <input
+                                                autoComplete="email"
+                                                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] text-base font-normal leading-normal"
+                                                id="email"
+                                                name="email"
+                                                placeholder=""
+                                                required
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            />
                                         </div>
                                         <div className="flex flex-col">
                                             <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="password">Master Password</label>
                                             <div className="relative flex w-full flex-1 items-stretch rounded-lg">
-                                                <input autoComplete="new-password" className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] pr-12 text-base font-normal leading-normal" id="password" name="password" placeholder="Enter your master password" required type="password" />
+                                                <input
+                                                    autoComplete="new-password"
+                                                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] pr-12 text-base font-normal leading-normal"
+                                                    id="password"
+                                                    name="password"
+                                                    placeholder=""
+                                                    required
+                                                    type="password"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                />
                                                 <button className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#b89d9d] hover:text-white" type="button">
                                                     <span className="material-symbols-outlined">visibility</span>
                                                 </button>
@@ -49,7 +104,17 @@ export default function Register() {
                                         <div className="flex flex-col">
                                             <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="confirm-password">Confirm Master Password</label>
                                             <div className="relative flex w-full flex-1 items-stretch rounded-lg">
-                                                <input autoComplete="new-password" className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] pr-12 text-base font-normal leading-normal" id="confirm-password" name="confirm-password" placeholder="Confirm your master password" required type="password" />
+                                                <input
+                                                    autoComplete="new-password"
+                                                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#533c3c] bg-[#2D3748] focus:border-primary h-14 placeholder:text-[#b89d9d] p-[15px] pr-12 text-base font-normal leading-normal"
+                                                    id="confirm-password"
+                                                    name="confirm-password"
+                                                    placeholder=""
+                                                    required
+                                                    type="password"
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                />
                                                 <button className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#b89d9d] hover:text-white" type="button">
                                                     <span className="material-symbols-outlined">visibility_off</span>
                                                 </button>
