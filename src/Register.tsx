@@ -29,7 +29,7 @@ export default function Register() {
                 createdAt: new Date().toISOString()
             });
 
-            navigate('/login');
+            navigate('/dashboard');
         } catch (err: any) {
             setError(err.message);
         }

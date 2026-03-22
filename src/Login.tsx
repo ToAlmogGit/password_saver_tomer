@@ -15,7 +15,7 @@ export default function Login() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/'); // Redirect to home/dashboard after login
+            navigate('/dashboard'); // Redirect to home/dashboard after login
         } catch (err: any) {
             setError(err.message);
         }
