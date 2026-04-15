@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auth, db } from './firebase';
+import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 
 type PasswordEntry = {
     id: string;
@@ -7,45 +10,51 @@ type PasswordEntry = {
     lastUpdated: string;
     iconUrl: string;
     passwordValue: string;
+    notes?: string;
+    siteUrl?: string;
 };
 
-const initialPasswordsData: PasswordEntry[] = [
-    {
-        id: '1',
-        website: 'Google',
-        username: 'user@example.com',
-        lastUpdated: '2 days ago',
-        iconUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFhXIMKZ0JbY-3GQ8yP45MVaXCfbZJGVmYtlxR3DaYUpj8LcK4z388lv6oQZ10V2wUvZIwNe0mkMSoHVc-4LdpU8qB8qdi3gE4zFSAQr6OFRBuA0W_zYSLXMuVXkwLeOKw6fv0O5YAKbAy8Lkxsmg46FKAe3dYwbd5_yypgHZInWp9RyD7DOAn1M9ca_l9-TC9cL5F0uQVN0iZS_ohL4HyryUvlpc75xGBguDtOcRpjOEZZ20lVOA6nOUb4k3rOR1PlOsFoT1wIAXv',
-        passwordValue: 'sUp3rS3cr3tP@ssw0rd!'
-    },
-    {
-        id: '2',
-        website: 'GitHub',
-        username: 'userdev',
-        lastUpdated: '1 week ago',
-        iconUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDHRLyCx7tHVeq560I3Ga4uqyTK42FBRmLPbXqwHHU9y6f60JNyj-jNlsYQZxmgkS8xtkw80qVgVvhljlbk1lOsK5UA06vkEWospnt-ZK_er9NKaMa4-4_v-RV-YH0izUyMumCqQtzIq2uzctqjU4Vm_EaKuMR7uQzu8mU7PJ4g4od-25CnAaBCx1egogzZR5nko5AqBqi5n3Oz24oCDkPzl5O9Oj3DX2DCLz9drTq7V5XQa4ssM8E2Ddw_T8FkkmtMfsk-kUKXzUiW',
-        passwordValue: 'gh_secret_pas$word'
-    },
-    {
-        id: '3',
-        website: 'Twitter',
-        username: '@userhandle',
-        lastUpdated: '3 weeks ago',
-        iconUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBBk_omx_G9fc3osdan2NqYtgpFLDsvYZC8oea7FmH1K6wTjUpQkM2kR88FkAzazWwSSxr-wkRZUJ0AvG9mq85qaZMnEzxYyZe0P3Vc1s10a90OD2eZ2ONWukCvItFt2End41ouTgZ5TY6H6icnXleGhElA8ThaxwSwk0D5Izp7wIX-iOcQrYTbeLfNkDsk6-Aufdft1DONxeQdl7dtcC5rT5BCebxidszLsxUhDj--BXBLVlYetl-FSfMQdNx5VdTZmRohIdmRoifg',
-        passwordValue: 'twitt3r_123!'
-    }
-];
+
 
 export default function Dashboard() {
-    const [passwords, setPasswords] = useState<PasswordEntry[]>(() => {
-        const saved = localStorage.getItem('password-saver-data');
-        if (saved) return JSON.parse(saved);
-        return initialPasswordsData;
-    });
+    const navigate = useNavigate();
+    const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
 
     useEffect(() => {
-        localStorage.setItem('password-saver-data', JSON.stringify(passwords));
-    }, [passwords]);
+        let unsubscribeSnap: () => void;
+        
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            if (user) {
+                const q = query(collection(db, 'users', user.uid, 'passwords'));
+                unsubscribeSnap = onSnapshot(q, (snapshot) => {
+                    const loaded: PasswordEntry[] = [];
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        const timestamp = data.updatedAt || data.createdAt;
+                        loaded.push({
+                            id: docSnap.id,
+                            website: data.website || 'Unknown',
+                            username: data.username || '',
+                            lastUpdated: timestamp?.toDate ? timestamp.toDate().toLocaleDateString() : 'Just now',
+                            iconUrl: data.iconUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFhXIMKZ0JbY-3GQ8yP45MVaXCfbZJGVmYtlxR3DaYUpj8LcK4z388lv6oQZ10V2wUvZIwNe0mkMSoHVc-4LdpU8qB8qdi3gE4zFSAQr6OFRBuA0W_zYSLXMuVXkwLeOKw6fv0O5YAKbAy8Lkxsmg46FKAe3dYwbd5_yypgHZInWp9RyD7DOAn1M9ca_l9-TC9cL5F0uQVN0iZS_ohL4HyryUvlpc75xGBguDtOcRpjOEZZ20lVOA6nOUb4k3rOR1PlOsFoT1wIAXv',
+                            passwordValue: data.passwordValue || '',
+                            notes: data.notes || '',
+                            siteUrl: data.siteUrl || data.website || ''
+                        });
+                    });
+                    setPasswords(loaded);
+                });
+            } else {
+                setPasswords([]);
+                navigate('/login');
+            }
+        });
+
+        return () => {
+            if (unsubscribeSnap) unsubscribeSnap();
+            unsubscribeAuth();
+        };
+    }, [navigate]);
     const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | null>(null);
     const [passwordToDelete, setPasswordToDelete] = useState<PasswordEntry | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -105,12 +114,12 @@ export default function Dashboard() {
                                 <div className="hidden md:flex flex-1 justify-end gap-8">
                                     <div className="flex items-center gap-9">
                                         <a className="text-primary text-sm font-medium leading-normal" href="#">Passwords</a>
-                                        <a className="text-white hover:text-primary/80 text-sm font-medium leading-normal" href="#">Create</a>
+                                        <button onClick={() => navigate('/create-password')} className="text-white hover:text-primary/80 text-sm font-medium leading-normal">Create</button>
                                         <a className="text-white hover:text-primary/80 text-sm font-medium leading-normal" href="#">Account</a>
                                         <a className="text-white hover:text-primary/80 text-sm font-medium leading-normal" href="#">Settings</a>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                                        <button onClick={() => navigate('/create-password')} className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
                                             <span className="truncate">Create New</span>
                                         </button>
                                         <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC3jY4BA5fmvrr1LrYiTlkMe-It5K2k_cOzhcIeNQ2JfoMn1f-wyZJmVMXnjnEoLFDRtXz6bgMlicSNT_rzsPcY5QPfdaHDwD9Abdwf6mGoo7gCrNAMCUEhmA-WuJgpd3A-wupRoHuIIZlNtOTcFq2T1ADFObbpfN0hvvZU3OrbFu2lS0byA-60PnMnL9aisNgo95Tt-owO-ckS2PWE6A5Ta-lJmQvFSNExT8cl3ICyDHZIWZj_Zn__OBfMK42Ii2auFFq6SJhRoVvs")' }}></div>
@@ -172,13 +181,16 @@ export default function Dashboard() {
                                                         </td>
                                                         <td className="h-[72px] px-4 py-2 text-[#b89d9d]">
                                                             <div className="flex items-center gap-2">
-                                                                <button 
+                                                                 <button 
                                                                     onClick={() => setSelectedPassword(pwd)}
                                                                     className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors"
                                                                 >
                                                                     <span className="material-symbols-outlined">visibility</span>
                                                                 </button>
-                                                                <button className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors">
+                                                                <button 
+                                                                    onClick={() => navigate('/create-password', { state: { editData: pwd } })}
+                                                                    className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors"
+                                                                >
                                                                     <span className="material-symbols-outlined">edit</span>
                                                                 </button>
                                                                 <button 
@@ -200,7 +212,7 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className="fixed bottom-5 right-5">
-                    <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 w-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg hover:bg-primary/90 transition-colors">
+                    <button onClick={() => navigate('/create-password')} className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 w-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg hover:bg-primary/90 transition-colors">
                         <span className="material-symbols-outlined text-3xl">add</span>
                     </button>
                 </div>
@@ -245,15 +257,24 @@ export default function Dashboard() {
                                 </div>
                                 <p className="text-xs text-gray-500">Last updated: {selectedPassword.lastUpdated}</p>
                             </div>
-                            <div className="flex w-full items-center justify-end gap-2 pt-4">
-                                <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors hover:bg-white/10">
-                                    <span className="truncate">Edit</span>
+                            <div className="flex w-full items-center justify-end gap-2 pt-6 border-t border-[#333]">
+                                <button 
+                                    onClick={() => setSelectedPassword(null)}
+                                    className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold bg-[#444] hover:bg-[#555] transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/create-password', { state: { editData: selectedPassword } })}
+                                    className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold bg-white/10 hover:bg-white/20 transition-colors"
+                                >
+                                    Edit
                                 </button>
                                 <button 
                                     onClick={() => setSelectedPassword(null)}
-                                    className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors hover:bg-primary/90"
+                                    className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                                 >
-                                    <span className="truncate">Done</span>
+                                    Done
                                 </button>
                             </div>
                         </div>
@@ -277,8 +298,11 @@ export default function Dashboard() {
                                 Cancel
                             </button>
                             <button 
-                                onClick={() => {
-                                    setPasswords(prev => prev.filter(p => p.id !== passwordToDelete.id));
+                                onClick={async () => {
+                                    const user = auth.currentUser;
+                                    if (user && passwordToDelete) {
+                                        await deleteDoc(doc(db, 'users', user.uid, 'passwords', passwordToDelete.id));
+                                    }
                                     setPasswordToDelete(null);
                                 }}
                                 className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
