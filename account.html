@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ea2a2a",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#181111",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-dark dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex-none flex h-20 items-center justify-between gap-4 border-b border-[#261c1c] px-6">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="John Doe's profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHUpCkiePLXls6cdTRZCB0I6zt6RnZHBMqSS1QVd8wkoH6kxTTZ2jIVJM4z3cRpdAkEnFm9tRmo0F8dmfe0cfFIfOUWreNIXEDFxU3aNULOSrJSwrdEQl4z0_WI18gRErMWSsvCeECDcqJqYglcJBgowueuajR1B-9ZJTEAfhRQB6d2KzIP9DLiobqIHUIarKK-tkWMSS1J6PCblW7JWLY0DxZPpIV8kqSzF0wgcqgMoTen1mVxv0NFD_tp-9dKL_GwRAakNCM052m");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">John Doe</h1>
+<p class="text-[#b89d9d] text-sm font-normal leading-normal">john.doe@example.com</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">lock</span>
+<p class="text-sm font-medium leading-normal">Passwords</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<p class="text-sm font-medium leading-normal">Create</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg bg-[#382929] px-3 py-2 text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<p class="text-sm font-medium leading-normal">Account</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</div>
+<button class="flex h-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white">
+<span class="truncate">Log Out</span>
+</button>
+</div>
+</header>
+<div class="flex-1 px-10 py-5">
+<div class="layout-content-container flex flex-col max-w-full">
+<div class="flex flex-wrap justify-between gap-3 p-4">
+<p class="text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Account Settings</p>
+</div>
+<div class="mt-8 px-4">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Change Master Password</h2>
+<div class="flex flex-col gap-4 max-w-xl">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-base font-medium leading-normal pb-2">Current Master Password</p>
+<div class="flex w-full flex-1 items-stretch rounded-lg">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#261c1c] focus:border-[#533c3c] h-14 placeholder:text-[#b89d9d] p-[15px] rounded-r-none border-r-0 text-base font-normal leading-normal" placeholder="Enter your current master password" type="password" value=""/>
+<div class="text-[#b89d9d] flex border border-[#533c3c] bg-[#261c1c] items-center justify-center pr-[15px] rounded-r-lg border-l-0 cursor-pointer">
+<span class="material-symbols-outlined">visibility_off</span>
+</div>
+</div>
+</label>
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-base font-medium leading-normal pb-2">New Master Password</p>
+<div class="flex w-full flex-1 items-stretch rounded-lg">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#261c1c] focus:border-[#533c3c] h-14 placeholder:text-[#b89d9d] p-[15px] rounded-r-none border-r-0 text-base font-normal leading-normal" placeholder="Enter your new master password" type="password" value=""/>
+<div class="text-[#b89d9d] flex border border-[#533c3c] bg-[#261c1c] items-center justify-center pr-[15px] rounded-r-lg border-l-0 cursor-pointer">
+<span class="material-symbols-outlined">visibility_off</span>
+</div>
+</div>
+</label>
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-base font-medium leading-normal pb-2">Confirm New Master Password</p>
+<div class="flex w-full flex-1 items-stretch rounded-lg">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#261c1c] focus:border-[#533c3c] h-14 placeholder:text-[#b89d9d] p-[15px] rounded-r-none border-r-0 text-base font-normal leading-normal" placeholder="Confirm your new master password" type="password" value=""/>
+<div class="text-[#b89d9d] flex border border-[#533c3c] bg-[#261c1c] items-center justify-center pr-[15px] rounded-r-lg border-l-0 cursor-pointer">
+<span class="material-symbols-outlined">visibility_off</span>
+</div>
+</div>
+</label>
+<button class="flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] mt-2">
+<span class="truncate">Update Password</span>
+</button>
+</div>
+</div>
+<div class="mt-8 px-4">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Update Contact Details</h2>
+<div class="flex flex-col gap-4 max-w-xl">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-base font-medium leading-normal pb-2">Email Address</p>
+<div class="flex w-full flex-1 items-stretch rounded-lg">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#261c1c] focus:border-[#533c3c] h-14 placeholder:text-[#b89d9d] p-[15px] text-base font-normal leading-normal" placeholder="your.email@example.com" type="email" value="john.doe@example.com"/>
+</div>
+</label>
+<button class="flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] mt-2">
+<span class="truncate">Update Email</span>
+</button>
+</div>
+</div>
+<div class="mt-8 px-4">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Security Preferences</h2>
+<div class="flex items-center justify-between max-w-xl p-4 rounded-lg bg-[#261c1c] border border-[#533c3c]">
+<div>
+<p class="text-white text-base font-medium leading-normal">Enable Two-Factor Authentication (2FA)</p>
+<p class="text-[#b89d9d] text-sm">Add an extra layer of security to your account.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer" for="toggle"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ea2a2a;
+        }
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #ea2a2a;
+        }
+    </style>
+</body></html>

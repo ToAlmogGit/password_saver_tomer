@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from './firebase';
 
 export default function Login() {
@@ -8,6 +8,12 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    // Forgot-password modal state
+    const [showForgotModal, setShowForgotModal] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetFeedback, setResetFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [resetLoading, setResetLoading] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,6 +24,34 @@ export default function Login() {
             navigate('/dashboard'); // Redirect to home/dashboard after login
         } catch (err: any) {
             setError(err.message);
+        }
+    };
+
+    const openForgotModal = () => {
+        setResetEmail(email); // pre-fill with whatever they already typed
+        setResetFeedback(null);
+        setShowForgotModal(true);
+    };
+
+    const handleSendReset = async () => {
+        setResetFeedback(null);
+        if (!resetEmail.trim()) {
+            setResetFeedback({ message: 'Please enter your email address.', type: 'error' });
+            return;
+        }
+
+        setResetLoading(true);
+        try {
+            await sendPasswordResetEmail(auth, resetEmail.trim());
+            setResetFeedback({ message: 'Password reset link sent! Check your inbox.', type: 'success' });
+        } catch (err: any) {
+            let msg = 'Failed to send reset email.';
+            if (err.code === 'auth/user-not-found') msg = 'No account found with that email.';
+            else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+            else if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
+            setResetFeedback({ message: msg, type: 'error' });
+        } finally {
+            setResetLoading(false);
         }
     };
 
@@ -81,7 +115,7 @@ export default function Login() {
                                         </button>
                                     </div>
                                     <div className="text-center mt-2 px-4">
-                                        <a className="text-primary text-sm font-medium hover:underline" href="#">Forgot Password?</a>
+                                        <button onClick={openForgotModal} className="text-primary text-sm font-medium hover:underline cursor-pointer bg-transparent border-none">Forgot Password?</button>
                                     </div>
                                     <div className="text-center mt-6 px-4">
                                         <p className="text-[#b89d9d]">Don't have an account? <Link to="/register" className="text-primary font-medium hover:underline">Create an account</Link></p>
@@ -100,6 +134,88 @@ export default function Login() {
                     </div>
                 </div>
             </div>
+
+            {/* ── Forgot Password Modal ── */}
+            {showForgotModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForgotModal(false)}></div>
+
+                    {/* Modal Card */}
+                    <div className="relative bg-[#2a2a2a] border border-[#3a3a3a] rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 animate-[fadeInScale_0.2s_ease-out]">
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowForgotModal(false)}
+                            className="absolute top-4 right-4 text-[#b89d9d] hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+                        >
+                            <span className="material-symbols-outlined text-xl">close</span>
+                        </button>
+
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-primary text-3xl">lock_reset</span>
+                            </div>
+                        </div>
+
+                        <h2 className="text-white text-xl font-bold text-center mb-1">Reset Password</h2>
+                        <p className="text-[#b89d9d] text-sm text-center mb-6">Enter your email and we'll send you a link to reset your password.</p>
+
+                        {/* Feedback */}
+                        {resetFeedback && (
+                            <div className={`p-3 mb-4 rounded-lg text-sm text-center ${resetFeedback.type === 'success' ? 'bg-green-500/15 text-green-400 border border-green-500/25' : 'bg-red-500/15 text-red-400 border border-red-500/25'}`}>
+                                {resetFeedback.message}
+                            </div>
+                        )}
+
+                        {/* Email input */}
+                        <label className="flex flex-col mb-5">
+                            <p className="text-white text-sm font-medium mb-2">Email Address</p>
+                            <input
+                                className="form-input w-full rounded-lg text-white bg-[#1a1a1a] border border-[#444] focus:border-primary focus:outline-none h-12 px-4 text-sm placeholder:text-[#666]"
+                                placeholder="you@example.com"
+                                type="email"
+                                autoComplete="off"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleSendReset(); }}
+                            />
+                        </label>
+
+                        {/* Buttons */}
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleSendReset}
+                                disabled={resetLoading}
+                                className="w-full h-12 rounded-lg bg-primary text-white text-sm font-bold tracking-wide hover:bg-red-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {resetLoading ? (
+                                    <>
+                                        <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                                        Sending…
+                                    </>
+                                ) : (
+                                    'Send Reset Link'
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setShowForgotModal(false)}
+                                className="w-full h-10 rounded-lg bg-transparent border border-[#444] text-[#b89d9d] text-sm font-medium hover:bg-[#333] hover:text-white transition-colors cursor-pointer"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal animation keyframe */}
+            <style>{`
+                @keyframes fadeInScale {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to   { opacity: 1; transform: scale(1); }
+                }
+            `}</style>
         </div>
     );
 }

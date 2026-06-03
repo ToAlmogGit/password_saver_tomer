@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth, db } from './firebase';
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 // ── Character sets ──────────────────────────────────────────────────────────
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -198,6 +198,25 @@ export default function CreatePassword() {
   const location = useLocation();
   const editData = location.state?.editData;
   const editingId = editData?.id;
+  const [profilePicUrl, setProfilePicUrl] = useState("https://lh3.googleusercontent.com/aida-public/AB6AXuC3jY4BA5fmvrr1LrYiTlkMe-It5K2k_cOzhcIeNQ2JfoMn1f-wyZJmVMXnjnEoLFDRtXz6bgMlicSNT_rzsPcY5QPfdaHDwD9Abdwf6mGoo7gCrNAMCUEhmA-WuJgpd3A-wupRoHuIIZlNtOTcFq2T1ADFObbpfN0hvvZU3OrbFu2lS0byA-60PnMnL9aisNgo95Tt-owO-ckS2PWE6A5Ta-lJmQvFSNExT8cl3ICyDHZIWZj_Zn__OBfMK42Ii2auFFq6SJhRoVvs");
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+          if (userDocSnap.exists() && userDocSnap.data().profilePicUrl) {
+            setProfilePicUrl(userDocSnap.data().profilePicUrl);
+          }
+        } catch (e) {
+          console.error('Error fetching custom pfp:', e);
+        }
+      } else {
+        navigate('/login');
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   const [length, setLength] = useState(16);
   const [showPassword, setShowPassword] = useState(false);
@@ -323,17 +342,40 @@ export default function CreatePassword() {
               <span className="material-symbols-outlined text-primary text-3xl">lock</span>
               <span className="text-white text-lg font-bold">Password Manager</span>
             </div>
-            <nav className="hidden md:flex items-center space-x-1">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Passwords
-              </button>
-              <span className="bg-[#3a3a3a] text-white px-3 py-2 rounded-md text-sm font-medium">Create</span>
-              <a className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="#">Account</a>
-              <a className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="#">Settings</a>
-            </nav>
+            <div className="hidden md:flex items-center gap-4">
+              <nav className="flex items-center space-x-1">
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Passwords
+                </button>
+                <button
+                  onClick={() => navigate('/create-password')}
+                  className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={() => navigate('/account')}
+                  className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Account
+                </button>
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="text-gray-300 hover:bg-[#3a3a3a] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Settings
+                </button>
+              </nav>
+              <div 
+                onClick={() => navigate('/account')} 
+                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer border border-[#444] hover:border-primary/50 transition-colors" 
+                data-alt="User avatar" 
+                style={{ backgroundImage: `url("${profilePicUrl}")` }}
+              ></div>
+            </div>
           </div>
         </div>
       </header>

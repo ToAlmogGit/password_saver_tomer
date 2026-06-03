@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
-import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, onSnapshot, deleteDoc, doc, getDoc } from 'firebase/firestore';
 
 type PasswordEntry = {
     id: string;
@@ -19,12 +19,23 @@ type PasswordEntry = {
 export default function Dashboard() {
     const navigate = useNavigate();
     const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+    const [profilePicUrl, setProfilePicUrl] = useState("https://lh3.googleusercontent.com/aida-public/AB6AXuC3jY4BA5fmvrr1LrYiTlkMe-It5K2k_cOzhcIeNQ2JfoMn1f-wyZJmVMXnjnEoLFDRtXz6bgMlicSNT_rzsPcY5QPfdaHDwD9Abdwf6mGoo7gCrNAMCUEhmA-WuJgpd3A-wupRoHuIIZlNtOTcFq2T1ADFObbpfN0hvvZU3OrbFu2lS0byA-60PnMnL9aisNgo95Tt-owO-ckS2PWE6A5Ta-lJmQvFSNExT8cl3ICyDHZIWZj_Zn__OBfMK42Ii2auFFq6SJhRoVvs");
 
     useEffect(() => {
         let unsubscribeSnap: () => void;
-        
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+
+        const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
             if (user) {
+                // Fetch profile image
+                try {
+                    const userDocRef = doc(db, 'users', user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists() && userDocSnap.data().profilePicUrl) {
+                        setProfilePicUrl(userDocSnap.data().profilePicUrl);
+                    }
+                } catch (e) {
+                    console.error('Error loading custom avatar:', e);
+                }
                 const q = query(collection(db, 'users', user.uid, 'passwords'));
                 unsubscribeSnap = onSnapshot(q, (snapshot) => {
                     const loaded: PasswordEntry[] = [];
@@ -69,9 +80,9 @@ export default function Dashboard() {
 
     const sortedPasswords = useMemo(() => {
         if (!searchQuery) return passwords;
-        
+
         const query = searchQuery.toLowerCase();
-        
+
         return [...passwords].sort((a, b) => {
             const aNameMatch = a.website.toLowerCase().includes(query);
             const bNameMatch = b.website.toLowerCase().includes(query);
@@ -80,15 +91,15 @@ export default function Dashboard() {
 
             const aMatch = aNameMatch || aUserMatch;
             const bMatch = bNameMatch || bUserMatch;
-            
+
             // Prioritize matching items
             if (aMatch && !bMatch) return -1;
             if (!aMatch && bMatch) return 1;
-            
+
             // Within matching items, prioritize name starts-with
             const aStartsWith = a.website.toLowerCase().startsWith(query);
             const bStartsWith = b.website.toLowerCase().startsWith(query);
-            
+
             if (aStartsWith && !bStartsWith) return -1;
             if (!aStartsWith && bStartsWith) return 1;
 
@@ -113,16 +124,16 @@ export default function Dashboard() {
                                 </div>
                                 <div className="hidden md:flex flex-1 justify-end gap-8">
                                     <div className="flex items-center gap-9">
-                                        <a className="text-primary text-sm font-medium leading-normal" href="#">Passwords</a>
-                                        <button onClick={() => navigate('/create-password')} className="text-white hover:text-primary/80 text-sm font-medium leading-normal">Create</button>
-                                        <a className="text-white hover:text-primary/80 text-sm font-medium leading-normal" href="#">Account</a>
-                                        <a className="text-white hover:text-primary/80 text-sm font-medium leading-normal" href="#">Settings</a>
+                                        <button onClick={() => navigate('/dashboard')} className="text-primary text-sm font-medium leading-normal cursor-pointer">Passwords</button>
+                                        <button onClick={() => navigate('/create-password')} className="text-white hover:text-primary/80 text-sm font-medium leading-normal cursor-pointer">Create</button>
+                                        <button onClick={() => navigate('/account')} className="text-white hover:text-primary/80 text-sm font-medium leading-normal cursor-pointer">Account</button>
+                                        <button onClick={() => navigate('/settings')} className="text-white hover:text-primary/80 text-sm font-medium leading-normal cursor-pointer">Settings</button>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => navigate('/create-password')} className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
                                             <span className="truncate">Create New</span>
                                         </button>
-                                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC3jY4BA5fmvrr1LrYiTlkMe-It5K2k_cOzhcIeNQ2JfoMn1f-wyZJmVMXnjnEoLFDRtXz6bgMlicSNT_rzsPcY5QPfdaHDwD9Abdwf6mGoo7gCrNAMCUEhmA-WuJgpd3A-wupRoHuIIZlNtOTcFq2T1ADFObbpfN0hvvZU3OrbFu2lS0byA-60PnMnL9aisNgo95Tt-owO-ckS2PWE6A5Ta-lJmQvFSNExT8cl3ICyDHZIWZj_Zn__OBfMK42Ii2auFFq6SJhRoVvs")' }}></div>
+                                        <div onClick={() => navigate('/account')} className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer" data-alt="User avatar" style={{ backgroundImage: `url("${profilePicUrl}")` }}></div>
                                     </div>
                                 </div>
                                 <div className="md:hidden">
@@ -135,15 +146,15 @@ export default function Dashboard() {
                                 <div className="py-6">
                                     <div className="relative">
                                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                                        <input 
-                                            className="form-input w-full rounded-lg border border-[#333] bg-[#1f1f1f] pl-10 pr-10 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-primary [&::-webkit-search-cancel-button]:hidden" 
-                                            placeholder="Search passwords..." 
+                                        <input
+                                            className="form-input w-full rounded-lg border border-[#333] bg-[#1f1f1f] pl-10 pr-10 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-primary [&::-webkit-search-cancel-button]:hidden"
+                                            placeholder="Search passwords..."
                                             type="search"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                         />
                                         {searchQuery && (
-                                            <button 
+                                            <button
                                                 onClick={() => setSearchQuery('')}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 transition-colors p-1 flex items-center justify-center rounded-full"
                                                 aria-label="Clear search"
@@ -181,19 +192,19 @@ export default function Dashboard() {
                                                         </td>
                                                         <td className="h-[72px] px-4 py-2 text-[#b89d9d]">
                                                             <div className="flex items-center gap-2">
-                                                                 <button 
+                                                                <button
                                                                     onClick={() => setSelectedPassword(pwd)}
                                                                     className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors"
                                                                 >
                                                                     <span className="material-symbols-outlined">visibility</span>
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => navigate('/create-password', { state: { editData: pwd } })}
                                                                     className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors"
                                                                 >
                                                                     <span className="material-symbols-outlined">edit</span>
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => setPasswordToDelete(pwd)}
                                                                     className="p-2 rounded-full hover:bg-primary/20 text-white hover:text-primary transition-colors"
                                                                 >
@@ -221,7 +232,7 @@ export default function Dashboard() {
             {selectedPassword && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <div className="relative w-full max-w-md rounded-xl bg-[#2a2a2a] p-8 shadow-2xl">
-                        <button 
+                        <button
                             onClick={() => setSelectedPassword(null)}
                             className="absolute top-4 right-4 rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                         >
@@ -239,14 +250,14 @@ export default function Dashboard() {
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium text-gray-300" htmlFor="password">Password</label>
                                     <div className="relative">
-                                        <input 
-                                            className={`form-input w-full rounded-lg bg-[#1f1f1f] px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-all duration-300 ${isCopied ? 'border border-primary shadow-[0_0_15px_rgba(234,42,42,0.4)]' : 'border border-[#333]'}`} 
-                                            id="password" 
-                                            readOnly 
-                                            type="text" 
-                                            value={selectedPassword.passwordValue} 
+                                        <input
+                                            className={`form-input w-full rounded-lg bg-[#1f1f1f] px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-all duration-300 ${isCopied ? 'border border-primary shadow-[0_0_15px_rgba(234,42,42,0.4)]' : 'border border-[#333]'}`}
+                                            id="password"
+                                            readOnly
+                                            type="text"
+                                            value={selectedPassword.passwordValue}
                                         />
-                                        <button 
+                                        <button
                                             onClick={handleCopy}
                                             className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary transition-colors"
                                             title="Copy password"
@@ -258,19 +269,19 @@ export default function Dashboard() {
                                 <p className="text-xs text-gray-500">Last updated: {selectedPassword.lastUpdated}</p>
                             </div>
                             <div className="flex w-full items-center justify-end gap-2 pt-6 border-t border-[#333]">
-                                <button 
+                                <button
                                     onClick={() => setSelectedPassword(null)}
                                     className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold bg-[#444] hover:bg-[#555] transition-colors"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => navigate('/create-password', { state: { editData: selectedPassword } })}
                                     className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold bg-white/10 hover:bg-white/20 transition-colors"
                                 >
                                     Edit
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setSelectedPassword(null)}
                                     className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                                 >
@@ -291,13 +302,13 @@ export default function Dashboard() {
                             Are you sure you want to delete the password for <span className="font-semibold text-white">{passwordToDelete.website}</span>?
                         </p>
                         <div className="flex w-full items-center justify-center gap-3">
-                            <button 
+                            <button
                                 onClick={() => setPasswordToDelete(null)}
                                 className="flex-1 cursor-pointer items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold bg-[#444] hover:bg-[#555] transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={async () => {
                                     const user = auth.currentUser;
                                     if (user && passwordToDelete) {

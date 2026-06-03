@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ea2a2a",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#181111",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-dark dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex-none flex h-20 items-center justify-between gap-4 border-b border-[#261c1c] px-6">
+<div class="flex items-center gap-4">
+<a class="flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<span class="text-white text-lg font-bold leading-normal">PasswordManager</span>
+</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">lock</span>
+<p class="text-sm font-medium leading-normal">Passwords</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<p class="text-sm font-medium leading-normal">Create</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-[#382929] transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-sm font-medium leading-normal">Account</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg bg-[#382929] px-3 py-2 text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="John Doe's profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHUpCkiePLXls6cdTRZCB0I6zt6RnZHBMqSS1QVd8wkoH6kxTTZ2jIVJM4z3cRpdAkEnFm9tRmo0F8dmfe0cfFIfOUWreNIXEDFxU3aNULOSrJSwrdEQl4z0_WI18gRErMWSsvCeECDcqJqYglcJBgowueuajR1B-9ZJTEAfhRQB6d2KzIP9DLiobqIHUIarKK-tkWMSS1J6PCblW7JWLY0DxZPpIV8kqSzF0wgcqgMoTen1mVxv0NFD_tp-9dKL_GwRAakNCM052m");'></div>
+</div>
+<button class="flex h-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white">
+<span class="truncate">Log Out</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex-1 px-10 py-5">
+<div class="layout-content-container flex flex-col max-w-full">
+<div class="flex flex-wrap justify-between gap-3 p-4">
+<p class="text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Settings</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8 px-4">
+<div class="flex flex-col gap-8">
+<div>
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Profile</h2>
+<div class="flex flex-col gap-4 max-w-xl">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-20" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHUpCkiePLXls6cdTRZCB0I6zt6RnZHBMqSS1QVd8wkoH6kxTTZ2jIVJM4z3cRpdAkEnFm9tRmo0F8dmfe0cfFIfOUWreNIXEDFxU3aNULOSrJSwrdEQl4z0_WI18gRErMWSsvCeECDcqJqYglcJBgowueuajR1B-9ZJTEAfhRQB6d2KzIP9DLiobqIHUIarKK-tkWMSS1J6PCblW7JWLY0DxZPpIV8kqSzF0wgcqgMoTen1mVxv0NFD_tp-9dKL_GwRAakNCM052m");'></div>
+<div class="flex flex-col gap-2">
+<p class="text-white text-base font-medium leading-normal">Profile Picture</p>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Change</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#261c1c] border border-[#533c3c] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Remove</span>
+</button>
+</div>
+</div>
+</div>
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-base font-medium leading-normal pb-2">Username</p>
+<div class="flex w-full flex-1 items-stretch rounded-lg">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#261c1c] focus:border-[#533c3c] h-14 placeholder:text-[#b89d9d] p-[15px] text-base font-normal leading-normal" placeholder="Enter your username" type="text" value="johndoe"/>
+</div>
+</label>
+<button class="flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] mt-2">
+<span class="truncate">Update Profile</span>
+</button>
+</div>
+</div>
+<div>
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Preferences</h2>
+<div class="flex flex-col gap-4 max-w-xl">
+<div class="flex items-center justify-between p-4 rounded-lg bg-[#261c1c] border border-[#533c3c]">
+<div>
+<p class="text-white text-base font-medium leading-normal">Light/Dark Mode</p>
+<p class="text-[#b89d9d] text-sm">Switch between light and dark themes.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="dark-mode-toggle" name="dark-mode-toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer" for="dark-mode-toggle"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-lg bg-[#261c1c] border border-[#533c3c]">
+<div>
+<p class="text-white text-base font-medium leading-normal">Censor Passwords</p>
+<p class="text-[#b89d9d] text-sm">Hide passwords by default.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="censor-toggle" name="censor-toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer" for="censor-toggle"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-8">
+<div>
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Data Management</h2>
+<div class="flex flex-col gap-4 max-w-xl p-4 rounded-lg bg-[#261c1c] border border-[#533c3c]">
+<p class="text-white text-base font-medium leading-normal">Export Passwords</p>
+<p class="text-[#b89d9d] text-sm">Export your saved passwords. For security, the exported file will not be encrypted. Please store it securely.</p>
+<div class="flex flex-col sm:flex-row gap-4 mt-2">
+<div class="flex-1">
+<label class="text-white text-sm font-medium leading-normal pb-2 block" for="format">Format</label>
+<select class="form-select w-full min-w-0 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#533c3c] bg-[#382929] focus:border-[#533c3c] h-12 placeholder:text-[#b89d9d] p-[15px] text-base font-normal leading-normal" id="format" name="format">
+<option value="csv">CSV</option>
+<option value="json">JSON</option>
+</select>
+</div>
+<button class="flex min-w-[84px] sm:self-end cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Export Passwords</span>
+</button>
+</div>
+</div>
+</div>
+<div>
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Delete Account</h2>
+<div class="flex flex-col gap-4 max-w-xl p-4 rounded-lg bg-[#261c1c] border border-primary">
+<p class="text-white text-base font-medium leading-normal">Danger Zone</p>
+<p class="text-[#b89d9d] text-sm">Deleting your account is a permanent action and cannot be undone. All your data, including saved passwords, will be permanently erased.</p>
+<button class="flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] mt-2">
+<span class="truncate">Delete My Account</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ea2a2a;
+        }
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #ea2a2a;
+        }
+    </style>
+</body></html>
